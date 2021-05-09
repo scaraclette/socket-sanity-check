@@ -15,7 +15,6 @@
 #include <iostream>
 #include <sys/time.h>
 
-using namespace std;
   
 #define PORT 6373
 const int MAX_MESSAGE_SIZE = 1460 / sizeof(int);

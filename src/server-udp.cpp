@@ -10,8 +10,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
-
-using namespace std;
+#include <random>
   
 #define PORT  6373
 const int MAX_DATA_SIZE = 1460 / sizeof(int);
@@ -100,14 +99,21 @@ void server_stop_wait(const int sockfd, struct sockaddr_in from_addr) {
  * Sliding Window test
  * Implements sliding window algorithm for Go-back-n
  */
-void server_early_retrans(const int sockfd, struct sockaddr_in from_addr) {
-    std::cout << "Server Early Retransmissions (Sliding Window handler)" << std::endl;
+void server_early_retrans(const int sockfd, struct sockaddr_in from_addr, int drop_probability = 0) {
+    std::cout << "Server Early Retransmissions (Sliding Window handler) with drop probability: " << drop_probability << std::endl;
     int buf[MAX_DATA_SIZE];
     int send_ack[sizeof(int)];
     unsigned int from_addr_len = sizeof(from_addr);
 
     // Count acks and packets
     int next_seq = 0;
+
+    // Create random seed
+    std::random_device rd;
+
+    // Flag to drop packet
+    bool drop_packet = false;
+    
 
     while (true) {
         // recvfrom
@@ -118,22 +124,38 @@ void server_early_retrans(const int sockfd, struct sockaddr_in from_addr) {
         }
 
         int ack = buf[0];
-        if (ack == next_seq) {
-            // Send ack as next seq
-            send_ack[0] = next_seq;
-            next_seq++;
-        } else {
-            // Resend previous ack
-            send_ack[0] = next_seq - 1;
-            std::cout << "Resending previous ack: " << next_seq-1 << std::endl << std::endl;
-        }
-        // Send ack
-        int send_to = sendto(sockfd, send_ack, sizeof(int), 0, (const struct sockaddr *) &from_addr, from_addr_len);
-        if (send_to == -1) {
-            perror("sendto");
-            return;
+
+        if (drop_probability != 0) {
+            std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+            std::uniform_int_distribution<> randomInt(0,100);    // set up the range
+            int dropVal = randomInt(gen);
+
+            if (dropVal < drop_probability) {
+                drop_packet = true;
+            } 
         }
 
+        if (!drop_packet) {
+            if (ack == next_seq) {
+            // Send ack as next seq
+            send_ack[0] = next_seq;
+            std::cout << "Sending new ack: " << next_seq << std::endl << std::endl;
+            next_seq++;
+            } else {
+                // Resend previous ack
+                send_ack[0] = next_seq - 1;
+                std::cout << "Resending previous ack: " << next_seq-1 << std::endl << std::endl;
+            }
+            // Send ack
+            int send_to = sendto(sockfd, send_ack, sizeof(int), 0, (const struct sockaddr *) &from_addr, from_addr_len);
+            if (send_to == -1) {
+                perror("sendto");
+                return;
+            }
+        }
+    
+        // No longer drops packet
+        drop_packet = false;
         memset(buf, 0, sizeof(buf));
         memset(send_ack, 0, sizeof(send_ack));
         if (next_seq >= MAX_RECV) {
@@ -175,7 +197,7 @@ int main() {
     // server_unreliable(sockfd, servaddr, fromaddr);
     // server_sanity_check(sockfd, from_addr);
     // server_stop_wait(sockfd, from_addr);
-    server_early_retrans(sockfd, from_addr);
+    server_early_retrans(sockfd, from_addr, 5);
 
       
     return 0;
