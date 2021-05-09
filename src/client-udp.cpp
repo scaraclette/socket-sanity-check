@@ -277,6 +277,94 @@ int client_sliding_window(const int sockfd, int message[], struct sockaddr_in se
     return retransmit_count;
 }
 
+// sliding window 2
+int client_sliding_window_2(const int sockfd, int message[], struct sockaddr_in serv_addr, struct sockaddr_in from_addr, int window_size = 4) {
+    std::cout << "Sliding Window with size: " << window_size << std::endl;
+    // addr lengths
+    unsigned int from_addr_len = sizeof(from_addr);
+    unsigned int serv_addr_len = sizeof(serv_addr);
+    // int array to receive ack
+    int ack_buf[sizeof(int)];
+
+    // Count retransmit
+    int retransmit_count = 0;
+
+    // Sliding window variables
+    int base = 0;
+    int next_seq = 0;
+
+    struct timeval start_time;
+    struct timeval stop_time;
+    unsigned long long elapsed_time_usec = 0;
+
+    while (true) {
+        if (next_seq < base + window_size) {
+            message[0] = next_seq;
+            // Send to server blocked
+            // Send to server blocked
+            int send_to = sendto(sockfd, message, MAX_MESSAGE_SIZE * sizeof(int), MSG_DONTWAIT, (struct sockaddr *)&serv_addr, serv_addr_len);
+            // if (send_to == -1) {
+            //     perror("sendto");
+            //     return -1;
+            // }
+            std::cout << "incrementing sequence: " << next_seq << std::endl;
+            std::cout << "base: " << base << ", next_sequence: " << next_seq << std::endl;
+            next_seq++;
+        }
+
+        int recv_from = recvfrom(sockfd, ack_buf, sizeof(int), MSG_DONTWAIT, (struct sockaddr *)&from_addr, &from_addr_len);
+        if (recv_from != 1) {
+            std::cout << "here" << std::endl;
+            int ack = ack_buf[0];
+            if (ack >= base) {
+                base = ack_buf[0] + 1;
+            }
+            
+            std::cout << "new base: " << base << ", expected seq: " << next_seq << std::endl;
+            if (base == next_seq) {
+                // stop timer
+                start_time.tv_sec = 0;
+                start_time.tv_usec = 0;
+                elapsed_time_usec = 0;
+            } else {
+                // start timer 
+                gettimeofday(&start_time, NULL);
+            }
+        }
+        std::cout << "did not receive" << std::endl;
+        // Check if window times out
+        gettimeofday(&stop_time, NULL);
+        elapsed_time_usec = (((stop_time.tv_sec - start_time.tv_sec) * 1000000) + (stop_time.tv_usec - start_time.tv_usec));
+
+        std::cout << "elapsed time: " << elapsed_time_usec << std::endl;
+
+        // Reset stop times
+        stop_time.tv_sec = 0;
+        stop_time.tv_usec = 0;
+
+        if (elapsed_time_usec >= TIMEOUT) {
+            std::cout << "TIMEOUT" << std::endl;
+            gettimeofday(&start_time, NULL);
+            for (int i = base; i < next_seq; i++) {
+                // std::cout << "retransmit: " << i << std::endl;
+                retransmit_count++;
+                message[0] = i;
+                int send_to = sendto(sockfd, message, MAX_MESSAGE_SIZE * sizeof(int), MSG_DONTWAIT, (struct sockaddr *)&serv_addr, serv_addr_len);
+                if (send_to == -1) {
+                    perror("sendto");
+                    return -1;
+                }
+            }
+        }
+
+        memset(ack_buf, 0, sizeof(ack_buf));
+        if (base == MAX_SEND) {
+            std::cout << "All messages sent!" << std::endl << std::endl;
+            break;
+        }
+    }
+}
+
 // Driver code
 int main() {
     int sockfd;
@@ -320,7 +408,7 @@ int main() {
         std::cout << "current: " << i << std::endl;
         gettimeofday(&start_time, NULL);
 
-        int sliding_window_retransmits = client_sliding_window(sockfd, message, serv_addr, from_addr);
+        int sliding_window_retransmits = client_sliding_window_2(sockfd, message, serv_addr, from_addr, i);
         retransmits_vector.push_back(sliding_window_retransmits);
 
         gettimeofday(&stop_time, NULL);
