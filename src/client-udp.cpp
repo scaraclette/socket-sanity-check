@@ -13,12 +13,14 @@
 #include <netinet/tcp.h>
 #include <sys/uio.h>
 #include <iostream>
+#include <sys/time.h>
 
 using namespace std;
   
 #define PORT 6373
 const int MAX_MESSAGE_SIZE = 1460 / sizeof(int);
 const int MAX_SEND = 20000;
+const int TIMEOUT = 1500;
   
 void client_unreliable(const int sockfd, int message[], struct sockaddr_in servaddr) {
     unsigned int servaddr_len = sizeof(servaddr);
@@ -91,10 +93,68 @@ int client_stop_wait(const int sockfd, int message[], struct sockaddr_in serv_ad
 
         // Non-block recvfrom to receive ack
         // TODO: change to non-block
-        int recv_from = recvfrom(sockfd, ack_buf, sizeof(int), 0, (struct sockaddr *) &from_addr, &from_addr_len);
+        int recv_from = recvfrom(sockfd, ack_buf, sizeof(int), MSG_DONTWAIT, (struct sockaddr *) &from_addr, &from_addr_len);
         if (recv_from == -1) {
             perror("recvfrom");
-            return -1;
+            
+            // Start timer;
+            struct timeval start_time;
+            struct timeval stop_time;
+
+            // Initialize ack to -1 until we get correct value
+            int ack = -1;
+
+            // Initialize retransmit flag
+            bool retransmit = true;
+
+            // Start timer and re-transmit until we get correct ack
+            while (ack != i) {
+                // loop until elapsed time usec == 1500
+                gettimeofday(&start_time, NULL);
+                unsigned long long elapsed_time_usec = 0;
+
+                std::cout << "restart timer" << std::endl;
+                while (elapsed_time_usec < TIMEOUT) {
+                    // update elapsed time
+                    gettimeofday(&stop_time, NULL);
+                    elapsed_time_usec = (((stop_time.tv_sec - start_time.tv_sec) * 1000000) + (stop_time.tv_usec - start_time.tv_usec));
+
+                    recv_from = recvfrom(sockfd, ack_buf, sizeof(int), MSG_DONTWAIT, (struct sockaddr *) &from_addr, &from_addr_len);
+                    ack_buf[recv_from] = '\0';
+                    ack = ack_buf[0];
+                    // std::cout << "received ack: " << ack << std::endl; 
+
+                    if (ack == i) {
+                        retransmit = false;
+                        break;
+                    }
+                }
+                // If ack is still incorrect, retransmit message
+                if (retransmit) {
+                    std::cout << "TIMEOUT!" << std::endl;
+                    retransmit_count++;
+                    std::cout << "retransmit count " << retransmit_count << std::endl;
+                    int send_to = sendto(sockfd, message, MAX_MESSAGE_SIZE * sizeof(int), 0, (struct sockaddr *)&serv_addr, serv_addr_len);
+                    if (send_to == -1) {
+                        perror("sendto");
+                        return -1;
+                    }
+                }
+            }
+
+            // If ack is still incorrect, retransmit message
+            // if (retransmit) {
+            //     std::cout << "TIMEOUT!" << std::endl;
+            //     retransmit_count++;
+            //     std::cout << "retransmit count " << retransmit_count << std::endl;
+            //     int send_to = sendto(sockfd, message, MAX_MESSAGE_SIZE * sizeof(int), 0, (struct sockaddr *)&serv_addr, serv_addr_len);
+            //     if (send_to == -1) {
+            //         perror("sendto");
+            //         return -1;
+            //     }
+            // }
+            // Ack is now correct
+            std::cout << "current ack: " << ack << ", expected ack: " << i << std::endl << std::endl;  
         } else {
             int ack = ack_buf[0];
             std::cout << "client received ack right away: " << ack << " at i: " << i << std::endl << std::endl;
@@ -121,7 +181,8 @@ int main() {
     memset(&serv_addr, 0, sizeof(serv_addr));
     memset(&from_addr, 0, sizeof(from_addr));
     struct hostent        *he;      
-    he = gethostbyname("127.0.0.1");
+    // he = gethostbyname("127.0.0.1");
+    he = gethostbyname("10.155.176.20");
     // Filling server information
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(PORT);
