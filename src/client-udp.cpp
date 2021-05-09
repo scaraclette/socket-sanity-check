@@ -80,7 +80,7 @@ int main() {
     memset(&servaddr, 0, sizeof(servaddr));
     memset(&fromaddr, 0, sizeof(fromaddr));
     struct hostent        *he;      
-    he = gethostbyname("127.0.0.1");
+    he = gethostbyname("10.155.176.23");
     // Filling server information
     servaddr.sin_family = AF_INET;
     servaddr.sin_port = htons(PORT);
