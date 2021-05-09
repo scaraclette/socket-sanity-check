@@ -139,12 +139,12 @@ void server_early_retrans(const int sockfd, struct sockaddr_in from_addr, int dr
             if (ack == next_seq) {
             // Send ack as next seq
             send_ack[0] = next_seq;
-            std::cout << "Sending new ack: " << next_seq << std::endl << std::endl;
+            // std::cout << "Sending new ack: " << next_seq << std::endl << std::endl;
             next_seq++;
             } else {
                 // Resend previous ack
                 send_ack[0] = next_seq - 1;
-                std::cout << "Resending previous ack: " << next_seq-1 << std::endl << std::endl;
+                // std::cout << "Resending previous ack: " << next_seq-1 << std::endl << std::endl;
             }
             // Send ack
             int send_to = sendto(sockfd, send_ack, sizeof(int), 0, (const struct sockaddr *) &from_addr, from_addr_len);
@@ -159,7 +159,7 @@ void server_early_retrans(const int sockfd, struct sockaddr_in from_addr, int dr
         memset(buf, 0, sizeof(buf));
         memset(send_ack, 0, sizeof(send_ack));
         if (next_seq >= MAX_RECV) {
-            std::cout << "All messages received!" << std::endl;
+            std::cout << "All messages received!" << std::endl << std::endl;
             break;
         }
     }
@@ -197,7 +197,12 @@ int main() {
     // server_unreliable(sockfd, servaddr, fromaddr);
     // server_sanity_check(sockfd, from_addr);
     // server_stop_wait(sockfd, from_addr);
-    server_early_retrans(sockfd, from_addr, 5);
+    // server_early_retrans(sockfd, from_addr, 5);
+
+    for (int i = 1; i <= 30; i++) {
+        std::cout << "current: " << i << std::endl;
+        server_early_retrans(sockfd, from_addr, 0);
+    }
 
       
     return 0;
