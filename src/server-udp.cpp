@@ -96,6 +96,54 @@ void server_stop_wait(const int sockfd, struct sockaddr_in from_addr) {
     }
 }
 
+/**
+ * Sliding Window test
+ * Implements sliding window algorithm for Go-back-n
+ */
+void server_early_retrans(const int sockfd, struct sockaddr_in from_addr) {
+    std::cout << "Server Early Retransmissions (Sliding Window handler)" << std::endl;
+    int buf[MAX_DATA_SIZE];
+    int send_ack[sizeof(int)];
+    unsigned int from_addr_len = sizeof(from_addr);
+
+    // Count acks and packets
+    int next_seq = 0;
+
+    while (true) {
+        // recvfrom
+        int numbytes = recvfrom(sockfd, buf, MAX_DATA_SIZE * sizeof(int), 0, (struct sockaddr *)&from_addr, &from_addr_len);    
+        if (numbytes == -1) {
+            perror("recvfrom");
+            return;
+        }
+
+        int ack = buf[0];
+        if (ack == next_seq) {
+            // Send ack as next seq
+            send_ack[0] = next_seq;
+            next_seq++;
+        } else {
+            // Resend previous ack
+            send_ack[0] = next_seq - 1;
+            std::cout << "Resending previous ack: " << next_seq-1 << std::endl << std::endl;
+        }
+        // Send ack
+        int send_to = sendto(sockfd, send_ack, sizeof(int), 0, (const struct sockaddr *) &from_addr, from_addr_len);
+        if (send_to == -1) {
+            perror("sendto");
+            return;
+        }
+
+        memset(buf, 0, sizeof(buf));
+        memset(send_ack, 0, sizeof(send_ack));
+        if (next_seq >= MAX_RECV) {
+            std::cout << "All messages received!" << std::endl;
+            break;
+        }
+    }
+
+}
+
 // Driver code
 int main() {
     int sockfd;
@@ -126,21 +174,9 @@ int main() {
       
     // server_unreliable(sockfd, servaddr, fromaddr);
     // server_sanity_check(sockfd, from_addr);
-    server_stop_wait(sockfd, from_addr);
+    // server_stop_wait(sockfd, from_addr);
+    server_early_retrans(sockfd, from_addr);
 
-
-
-    // int n;
-    // unsigned int len = sizeof(cliaddr);
-
-    // std::cout << "listening for client..." << std::endl;
-  
-    // while (1) {  
-    //     n = recvfrom(sockfd, (char *)buffer, sizeof(unsigned int), 
-    //             MSG_WAITALL, ( struct sockaddr *) &cliaddr,
-    //             &len);
-	// cout << *((unsigned int *) buffer) << endl;
-    // }
       
     return 0;
 }
