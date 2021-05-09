@@ -1,0 +1,242 @@
+current: 1
+Sliding Window with size: 1
+All messages sent!
+retransmit: 6316352
+elapsed time ms: 3319
+
+current: 2
+Sliding Window with size: 2
+All messages sent!
+retransmit: 6316352
+elapsed time ms: 1514
+
+current: 3
+Sliding Window with size: 3
+All messages sent!
+retransmit: 6316352
+elapsed time ms: 1144
+
+current: 4
+Sliding Window with size: 4
+All messages sent!
+retransmit: 6316352
+elapsed time ms: 1053
+
+current: 5
+Sliding Window with size: 5
+All messages sent!
+retransmit: 6316352
+elapsed time ms: 794
+
+current: 6
+Sliding Window with size: 6
+All messages sent!
+retransmit: 6316352
+elapsed time ms: 764
+
+current: 7
+Sliding Window with size: 7
+All messages sent!
+retransmit: 6316352
+elapsed time ms: 724
+
+current: 8
+Sliding Window with size: 8
+All messages sent!
+retransmit: 6316352
+elapsed time ms: 668
+
+current: 9
+Sliding Window with size: 9
+All messages sent!
+retransmit: 6316352
+elapsed time ms: 709
+
+current: 10
+Sliding Window with size: 10
+All messages sent!
+retransmit: 6316352
+elapsed time ms: 664
+
+current: 11
+Sliding Window with size: 11
+All messages sent!
+retransmit: 6316352
+elapsed time ms: 626
+
+current: 12
+Sliding Window with size: 12
+All messages sent!
+retransmit: 6316352
+elapsed time ms: 1334
+
+current: 13
+Sliding Window with size: 13
+All messages sent!
+retransmit: 6316352
+elapsed time ms: 793
+
+current: 14
+Sliding Window with size: 14
+All messages sent!
+retransmit: 6316352
+elapsed time ms: 645
+
+current: 15
+Sliding Window with size: 15
+All messages sent!
+retransmit: 6316352
+elapsed time ms: 634
+
+current: 16
+Sliding Window with size: 16
+All messages sent!
+retransmit: 6316352
+elapsed time ms: 721
+
+current: 17
+Sliding Window with size: 17
+All messages sent!
+retransmit: 6316352
+elapsed time ms: 666
+
+current: 18
+Sliding Window with size: 18
+All messages sent!
+retransmit: 6316352
+elapsed time ms: 643
+
+current: 19
+Sliding Window with size: 19
+All messages sent!
+retransmit: 6316352
+elapsed time ms: 613
+
+current: 20
+Sliding Window with size: 20
+All messages sent!
+retransmit: 6316352
+elapsed time ms: 669
+
+current: 21
+Sliding Window with size: 21
+All messages sent!
+retransmit: 6316352
+elapsed time ms: 650
+
+current: 22
+Sliding Window with size: 22
+All messages sent!
+retransmit: 6316352
+elapsed time ms: 648
+
+current: 23
+Sliding Window with size: 23
+All messages sent!
+retransmit: 6316352
+elapsed time ms: 704
+
+current: 24
+Sliding Window with size: 24
+All messages sent!
+retransmit: 6316352
+elapsed time ms: 822
+
+current: 25
+Sliding Window with size: 25
+All messages sent!
+retransmit: 6316352
+elapsed time ms: 758
+
+current: 26
+Sliding Window with size: 26
+All messages sent!
+retransmit: 6316352
+elapsed time ms: 903
+
+current: 27
+Sliding Window with size: 27
+All messages sent!
+retransmit: 6316352
+elapsed time ms: 834
+
+current: 28
+Sliding Window with size: 28
+All messages sent!
+retransmit: 6316352
+elapsed time ms: 854
+
+current: 29
+Sliding Window with size: 29
+All messages sent!
+retransmit: 6316352
+elapsed time ms: 946
+
+current: 30
+Sliding Window with size: 30
+All messages sent!
+retransmit: 6316352
+elapsed time ms: 974
+
+RETRANSMITS: 
+6316352,
+6316352,
+6316352,
+6316352,
+6316352,
+6316352,
+6316352,
+6316352,
+6316352,
+6316352,
+6316352,
+6316352,
+6316352,
+6316352,
+6316352,
+6316352,
+6316352,
+6316352,
+6316352,
+6316352,
+6316352,
+6316352,
+6316352,
+6316352,
+6316352,
+6316352,
+6316352,
+6316352,
+6316352,
+6316352,
+ELAPSED TIME: 
+3319,
+1514,
+1144,
+1053,
+794,
+764,
+724,
+668,
+709,
+664,
+626,
+1334,
+793,
+645,
+634,
+721,
+666,
+643,
+613,
+669,
+650,
+648,
+704,
+822,
+758,
+903,
+834,
+854,
+946,
+974,

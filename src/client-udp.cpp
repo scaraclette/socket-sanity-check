@@ -401,10 +401,10 @@ int main() {
     memset(&serv_addr, 0, sizeof(serv_addr));
     memset(&from_addr, 0, sizeof(from_addr));
     struct hostent        *he;      
-    he = gethostbyname("127.0.0.1");
+    // he = gethostbyname("127.0.0.1");
 
     // Linux lab: 2
-    // he = gethostbyname("10.155.176.23");
+    he = gethostbyname("10.155.176.23");
 
     // Filling server information
     serv_addr.sin_family = AF_INET;
