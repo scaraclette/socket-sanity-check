@@ -124,6 +124,7 @@ void server_early_retrans(const int sockfd, struct sockaddr_in from_addr, int dr
         }
 
         int ack = buf[0];
+        std::cout << "ack: " << ack << std::endl;
 
         if (drop_probability != 0) {
             std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
@@ -201,7 +202,7 @@ int main() {
 
     for (int i = 1; i <= 30; i++) {
         std::cout << "current: " << i << std::endl;
-        server_early_retrans(sockfd, from_addr, 9);
+        server_early_retrans(sockfd, from_addr, 3);
     }
 
       
