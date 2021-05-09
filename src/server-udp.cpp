@@ -1,4 +1,6 @@
 // Server side implementation of UDP client-server model
+// Server when sending -> use servaddr
+// Server when receiving -> use cliaddr
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,12 +17,12 @@ using namespace std;
 const int MAX_DATA_SIZE = 1460 / sizeof(int);
 const int MAX_RECV = 20000;
   
-void server_unreliable(const int sockfd, struct sockaddr_in servaddr, struct sockaddr_in cliaddr) {
+void server_unreliable(const int sockfd, struct sockaddr_in servaddr, struct sockaddr_in fromaddr) {
     int buf[MAX_DATA_SIZE];
-    unsigned int cliaddr_len = sizeof(cliaddr);
+    unsigned int fromaddr_len = sizeof(fromaddr);
 
     for (int i = 0; i < MAX_RECV; i++) {
-        int numbytes = recvfrom(sockfd, buf, MAX_DATA_SIZE * sizeof(int), 0, (struct sockaddr *)&cliaddr, &cliaddr_len);    
+        int numbytes = recvfrom(sockfd, buf, MAX_DATA_SIZE * sizeof(int), 0, (struct sockaddr *)&fromaddr, &fromaddr_len);    
         if (numbytes == -1) {
             perror("recvfrom");
             return;
@@ -30,11 +32,40 @@ void server_unreliable(const int sockfd, struct sockaddr_in servaddr, struct soc
     }
 }
 
+void server_sanity_check(const int sockfd, struct sockaddr_in servaddr, struct sockaddr_in fromaddr) {
+    // recvfrom: fromaddr
+    // sendto: fromaddr
+
+    int buf[MAX_DATA_SIZE];
+    int send_ack[sizeof(int)];
+
+    // len
+    unsigned int fromaddr_len = sizeof(fromaddr);
+    unsigned int servaddr_len = sizeof(servaddr);
+
+    // recvfrom
+    int numbytes = recvfrom(sockfd, buf, MAX_DATA_SIZE * sizeof(int), 0, (struct sockaddr *)&fromaddr, &fromaddr_len);    
+    if (numbytes == -1) {
+        perror("recvfrom");
+        return;
+    }
+
+    std::cout << "Received from client: " << buf[0] << std::endl;
+    std::cout << "send ack to client..." << std::endl;
+    send_ack[0] = buf[0] + 1;
+    // sendto
+    int send_to = sendto(sockfd, send_ack, sizeof(int), 0, (const struct sockaddr *) &fromaddr, fromaddr_len);
+    if (send_to == -1) {
+        perror("sendto");
+        return;
+    }
+}
+
 // Driver code
 int main() {
     int sockfd;
     char buffer[sizeof(unsigned int)];
-    struct sockaddr_in servaddr, cliaddr;
+    struct sockaddr_in servaddr, fromaddr;
       
     // Creating socket file descriptor
     if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) {
@@ -43,7 +74,7 @@ int main() {
     }
       
     memset(&servaddr, 0, sizeof(servaddr));
-    memset(&cliaddr, 0, sizeof(cliaddr));
+    memset(&fromaddr, 0, sizeof(fromaddr));
       
     // Filling server information
     servaddr.sin_family    = AF_INET; // IPv4
@@ -58,7 +89,11 @@ int main() {
         exit(EXIT_FAILURE);
     }
       
-    server_unreliable(sockfd, servaddr, cliaddr);
+    // server_unreliable(sockfd, servaddr, fromaddr);
+    server_sanity_check(sockfd, servaddr, fromaddr);
+
+
+
     // int n;
     // unsigned int len = sizeof(cliaddr);
 

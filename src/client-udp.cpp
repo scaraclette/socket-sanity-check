@@ -1,4 +1,6 @@
 // Client side implementation of UDP client-server model
+// Client when sending -> use cliaddr
+// Client when receiving -> use servaddr
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -30,10 +32,43 @@ void client_unreliable(const int sockfd, int message[], struct sockaddr_in serva
     }
 }
 
+void client_sanity_check(const int sockfd, int message[], struct sockaddr_in servaddr, struct sockaddr_in fromaddr) {
+    // sendto: serveraddr
+    // recvfrom: fromaddr
+
+    // len
+    unsigned int fromaddr_len = sizeof(fromaddr);
+    unsigned int servaddr_len = sizeof(servaddr);
+
+    // int array to receive ack
+    int ack_buf[sizeof(int)];
+    ack_buf[0] = -1;
+    message[0] = 33;
+
+    // send_to
+    int send_to = sendto(sockfd, message, MAX_MESSAGE_SIZE * sizeof(int), 0, (struct sockaddr *)&servaddr, servaddr_len);
+    if (send_to == -1) {
+        perror("sendto");
+        return;
+    }
+
+    // recv_from
+    int recv_from = recvfrom(sockfd, ack_buf, sizeof(int), 0, (struct sockaddr *) &fromaddr, &fromaddr_len);
+    if (recv_from == -1) {
+        perror("recvfrom");
+        return;
+    }
+
+    std::cout << "From server: " << ack_buf[0] << std::endl;
+
+
+
+}
+
 // Driver code
 int main() {
     int sockfd;
-    struct sockaddr_in servaddr;
+    struct sockaddr_in servaddr, fromaddr;
     int message[MAX_MESSAGE_SIZE];
   
     // Creating socket file descriptor
@@ -43,6 +78,7 @@ int main() {
     }
   
     memset(&servaddr, 0, sizeof(servaddr));
+    memset(&fromaddr, 0, sizeof(fromaddr));
     struct hostent        *he;      
     he = gethostbyname("127.0.0.1");
     // Filling server information
@@ -50,9 +86,10 @@ int main() {
     servaddr.sin_port = htons(PORT);
     servaddr.sin_addr.s_addr = inet_addr(inet_ntoa(*(struct in_addr*)*he->h_addr_list));
       
-    client_unreliable(sockfd, message, servaddr);
+    // client_unreliable(sockfd, message, servaddr);
+    client_sanity_check(sockfd, message, servaddr, fromaddr);
 
-    
+
     // int n, len;
     // for (unsigned int i = 0; i < 10000; i++) {     
     // sendto(sockfd, (const unsigned int *)&i, sizeof(unsigned int),
