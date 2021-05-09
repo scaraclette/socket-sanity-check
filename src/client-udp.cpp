@@ -32,13 +32,13 @@ void client_unreliable(const int sockfd, int message[], struct sockaddr_in serva
     }
 }
 
-void client_sanity_check(const int sockfd, int message[], struct sockaddr_in servaddr, struct sockaddr_in fromaddr) {
+void client_sanity_check(const int sockfd, int message[], struct sockaddr_in serv_addr, struct sockaddr_in from_addr) {
     // sendto: serveraddr
     // recvfrom: fromaddr
 
     // len
-    unsigned int fromaddr_len = sizeof(fromaddr);
-    unsigned int servaddr_len = sizeof(servaddr);
+    unsigned int from_addr_len = sizeof(from_addr);
+    unsigned int serv_addr_len = sizeof(serv_addr);
 
     // int array to receive ack
     int ack_buf[sizeof(int)];
@@ -46,29 +46,70 @@ void client_sanity_check(const int sockfd, int message[], struct sockaddr_in ser
     message[0] = 33;
 
     // send_to
-    int send_to = sendto(sockfd, message, MAX_MESSAGE_SIZE * sizeof(int), 0, (struct sockaddr *)&servaddr, servaddr_len);
+    int send_to = sendto(sockfd, message, MAX_MESSAGE_SIZE * sizeof(int), 0, (struct sockaddr *)&serv_addr, serv_addr_len);
     if (send_to == -1) {
         perror("sendto");
         return;
     }
 
     // recv_from
-    int recv_from = recvfrom(sockfd, ack_buf, sizeof(int), 0, (struct sockaddr *) &fromaddr, &fromaddr_len);
+    int recv_from = recvfrom(sockfd, ack_buf, sizeof(int), 0, (struct sockaddr *) &from_addr, &from_addr_len);
     if (recv_from == -1) {
         perror("recvfrom");
         return;
     }
 
     std::cout << "From server: " << ack_buf[0] << std::endl;
+}
 
+/**
+ * Stop-and-Wait test
+ * Implements the stop and wait algorithm (can be done as a sliding window witha size = 1).
+ * Alternative name is RDT2.0
+ */
+int client_stop_wait(const int sockfd, int message[], struct sockaddr_in serv_addr, struct sockaddr_in from_addr) {
+    // addr lengths
+    unsigned int from_addr_len = sizeof(from_addr);
+    unsigned int serv_addr_len = sizeof(serv_addr);
 
+    // int array to receive ack
+    int ack_buf[sizeof(int)];
+    ack_buf[0] = -1;
 
+    // Count retransmit
+    int retransmit_count = 0;
+
+    for (int i = 0; i < MAX_SEND; i++) {
+        message[0] = i;
+
+        // Send to server blocked
+        int send_to = sendto(sockfd, message, MAX_MESSAGE_SIZE * sizeof(int), 0, (struct sockaddr *)&serv_addr, serv_addr_len);
+        if (send_to == -1) {
+            perror("sendto");
+            return -1;
+        }
+
+        // Non-block recvfrom to receive ack
+        // TODO: change to non-block
+        int recv_from = recvfrom(sockfd, ack_buf, sizeof(int), 0, (struct sockaddr *) &from_addr, &from_addr_len);
+        if (recv_from == -1) {
+            perror("recvfrom");
+            return -1;
+        } else {
+            int ack = ack_buf[0];
+            std::cout << "client received ack right away: " << ack << " at i: " << i << std::endl << std::endl;
+        }
+        memset(ack_buf, 0, sizeof(ack_buf));
+    }
+
+    std::cout << "retransmit count: " << retransmit_count << std::endl;
+    return retransmit_count;
 }
 
 // Driver code
 int main() {
     int sockfd;
-    struct sockaddr_in servaddr, fromaddr;
+    struct sockaddr_in serv_addr, from_addr;
     int message[MAX_MESSAGE_SIZE];
   
     // Creating socket file descriptor
@@ -77,17 +118,18 @@ int main() {
         exit(EXIT_FAILURE);
     }
   
-    memset(&servaddr, 0, sizeof(servaddr));
-    memset(&fromaddr, 0, sizeof(fromaddr));
+    memset(&serv_addr, 0, sizeof(serv_addr));
+    memset(&from_addr, 0, sizeof(from_addr));
     struct hostent        *he;      
     he = gethostbyname("10.155.176.23");
     // Filling server information
-    servaddr.sin_family = AF_INET;
-    servaddr.sin_port = htons(PORT);
-    servaddr.sin_addr.s_addr = inet_addr(inet_ntoa(*(struct in_addr*)*he->h_addr_list));
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(PORT);
+    serv_addr.sin_addr.s_addr = inet_addr(inet_ntoa(*(struct in_addr*)*he->h_addr_list));
       
     // client_unreliable(sockfd, message, servaddr);
-    client_sanity_check(sockfd, message, servaddr, fromaddr);
+    // client_sanity_check(sockfd, message, serv_addr, from_addr);
+    int stop_wait_retransmits = client_stop_wait(sockfd, message, serv_addr, from_addr);
 
 
     // int n, len;
