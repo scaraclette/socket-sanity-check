@@ -302,7 +302,7 @@ int client_sliding_window_2(const int sockfd, int message[], struct sockaddr_in 
         if (next_seq < base + window_size) {
             message[0] = next_seq;
             // Send to server blocked
-            int send_to = sendto(sockfd, message, MAX_MESSAGE_SIZE * sizeof(int), MSG_DONTWAIT, (struct sockaddr *)&serv_addr, serv_addr_len);
+            int send_to = sendto(sockfd, message, MAX_MESSAGE_SIZE * sizeof(int), 0, (struct sockaddr *)&serv_addr, serv_addr_len);
             // if (send_to == -1) {
             //     perror("sendto");
             //     return -1;
@@ -322,7 +322,7 @@ int client_sliding_window_2(const int sockfd, int message[], struct sockaddr_in 
             
             // std::cout << "new base: " << base << ", expected seq: " << next_seq << std::endl;
             if (base == next_seq) {
-                std::cout << "reset all timer!" << std::endl;
+                // std::cout << "reset all timer!" << std::endl;
                 // stop timer
                 start_time.tv_sec = 0;
                 start_time.tv_usec = 0;
@@ -331,8 +331,9 @@ int client_sliding_window_2(const int sockfd, int message[], struct sockaddr_in 
                 stop_time.tv_sec = 0;
 
                 elapsed_time_usec = 0;
+                timer_start = false;
             } else {
-                std::cout << "Start timer!" << std::endl;
+                // std::cout << "Start timer!" << std::endl;
                 timer_start = true;
                 // start timer 
                 gettimeofday(&start_time, NULL);
@@ -341,30 +342,33 @@ int client_sliding_window_2(const int sockfd, int message[], struct sockaddr_in 
         }
         // std::cout << "did not receive" << std::endl;
         // Check if window times out
-        if (timer_start) {
-            std::cout << "going to gettime of day" << std::endl;
-            gettimeofday(&stop_time, NULL);
-            elapsed_time_usec = (((stop_time.tv_sec - start_time.tv_sec) * 1000000) + (stop_time.tv_usec - start_time.tv_usec));    
-        }
-        // gettimeofday(&stop_time, NULL);
-        // elapsed_time_usec += (((stop_time.tv_sec - start_time.tv_sec) * 1000000) + (stop_time.tv_usec - start_time.tv_usec));
+        // if (timer_start) {
+        //     std::cout << "going to gettime of day" << std::endl;
+        //     gettimeofday(&stop_time, NULL);
+        //     elapsed_time_usec = (((stop_time.tv_sec - start_time.tv_sec) * 1000000) + (stop_time.tv_usec - start_time.tv_usec));    
+        // }
+        gettimeofday(&stop_time, NULL);
+        elapsed_time_usec += (((stop_time.tv_sec - start_time.tv_sec) * 1000000) + (stop_time.tv_usec - start_time.tv_usec));
 
-        std::cout << "elapsed time: " << elapsed_time_usec << std::endl;
+        // std::cout << "elapsed time: " << elapsed_time_usec << std::endl;
 
         // // Reset stop times
         // stop_time.tv_sec = 0;
         // stop_time.tv_usec = 0;
 
-        if (elapsed_time_usec >= TIMEOUT) {
-            timer_start = false;
-            std::cout << "TIMEOUT at: " << elapsed_time_usec << std::endl;
+        if (elapsed_time_usec > TIMEOUT) {
+            timer_start = true;
+            // std::cout << "TIMEOUT at: " << elapsed_time_usec << std::endl;
             gettimeofday(&start_time, NULL);
+            stop_time.tv_usec = 0;
+            stop_time.tv_sec = 0;
             elapsed_time_usec = 0;
+            // std::cout << "base: " << base << ", next_sequence: " << next_seq << std::endl;
             for (int i = base; i < next_seq; i++) {
                 // std::cout << "retransmit: " << i << std::endl;
                 retransmit_count++;
                 message[0] = i;
-                int send_to = sendto(sockfd, message, MAX_MESSAGE_SIZE * sizeof(int), MSG_DONTWAIT, (struct sockaddr *)&serv_addr, serv_addr_len);
+                int send_to = sendto(sockfd, message, MAX_MESSAGE_SIZE * sizeof(int), 0, (struct sockaddr *)&serv_addr, serv_addr_len);
                 if (send_to == -1) {
                     perror("sendto");
                     return -1;
@@ -374,9 +378,11 @@ int client_sliding_window_2(const int sockfd, int message[], struct sockaddr_in 
 
         memset(ack_buf, 0, sizeof(ack_buf));
         if (base == MAX_SEND) {
-            std::cout << "All messages sent!" << std::endl << std::endl;
+            std::cout << "All messages sent!" << std::endl;
             break;
         }
+
+        retransmit_count;
     }
 }
 
@@ -431,6 +437,8 @@ int main() {
         unsigned long long elapsed_time_msec = (((stop_time.tv_sec - start_time.tv_sec) * 1000000) + (stop_time.tv_usec - start_time.tv_usec)) / 1000;
 
         elapsed_time_msec_vector.push_back(elapsed_time_msec);
+        std::cout << "retransmit: " << sliding_window_retransmits << std::endl;
+        std::cout << "elapsed time ms: " << elapsed_time_msec << std::endl << std::endl;
     }
 
     std::cout << "RETRANSMITS: " << std::endl;
