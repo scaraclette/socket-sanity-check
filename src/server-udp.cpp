@@ -35,11 +35,8 @@ void server_unreliable(const int sockfd, struct sockaddr_in servaddr, struct soc
 void server_sanity_check(const int sockfd, struct sockaddr_in from_addr) {
     // recvfrom: fromaddr
     // sendto: fromaddr
-
     int buf[MAX_DATA_SIZE];
     int send_ack[sizeof(int)];
-
-    // len
     unsigned int from_addr_len = sizeof(from_addr);
 
     // recvfrom
@@ -57,6 +54,45 @@ void server_sanity_check(const int sockfd, struct sockaddr_in from_addr) {
     if (send_to == -1) {
         perror("sendto");
         return;
+    }
+}
+
+/**
+ * Server Stop and Wait
+ * Repeats receiving message[] and sending an acknowledgement at a server side max (=20,000) times using the sock object.
+ */
+void server_stop_wait(const int sockfd, struct sockaddr_in from_addr) {
+    int buf[MAX_DATA_SIZE];
+    int send_ack[sizeof(int)];
+    unsigned int from_addr_len = sizeof(from_addr);
+    int ack = -1;
+
+    while (true) {
+        // recvfrom
+        int numbytes = recvfrom(sockfd, buf, MAX_DATA_SIZE * sizeof(int), 0, (struct sockaddr *)&from_addr, &from_addr_len);    
+        if (numbytes == -1) {
+            perror("recvfrom");
+            return;
+        }
+
+        if (buf[0] > ack) {
+            // std::cout << "here" << std::endl;
+            ack = buf[0];
+        }
+        send_ack[0] = buf[0];
+        std::cout << send_ack[0] << std::endl;
+
+        int send_to = sendto(sockfd, send_ack, sizeof(int), 0, (const struct sockaddr *) &from_addr, from_addr_len);
+        if (send_to == -1) {
+            perror("sendto");
+            return;
+        }
+
+        memset(buf, 0, sizeof(buf));
+        memset(send_ack, 0, sizeof(send_ack));
+        if (ack == MAX_RECV - 1) {
+            break;
+        }
     }
 }
 
@@ -89,7 +125,8 @@ int main() {
     }
       
     // server_unreliable(sockfd, servaddr, fromaddr);
-    server_sanity_check(sockfd, from_addr);
+    // server_sanity_check(sockfd, from_addr);
+    server_stop_wait(sockfd, from_addr);
 
 
 
