@@ -142,17 +142,6 @@ int client_stop_wait(const int sockfd, int message[], struct sockaddr_in serv_ad
                 }
             }
 
-            // If ack is still incorrect, retransmit message
-            // if (retransmit) {
-            //     std::cout << "TIMEOUT!" << std::endl;
-            //     retransmit_count++;
-            //     std::cout << "retransmit count " << retransmit_count << std::endl;
-            //     int send_to = sendto(sockfd, message, MAX_MESSAGE_SIZE * sizeof(int), 0, (struct sockaddr *)&serv_addr, serv_addr_len);
-            //     if (send_to == -1) {
-            //         perror("sendto");
-            //         return -1;
-            //     }
-            // }
             // Ack is now correct
             std::cout << "current ack: " << ack << ", expected ack: " << i << std::endl << std::endl;  
         } else {
@@ -182,7 +171,9 @@ int main() {
     memset(&from_addr, 0, sizeof(from_addr));
     struct hostent        *he;      
     // he = gethostbyname("127.0.0.1");
-    he = gethostbyname("10.155.176.20");
+
+    // Linux lab 
+    he = gethostbyname("10.155.176.23");
     // Filling server information
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(PORT);
