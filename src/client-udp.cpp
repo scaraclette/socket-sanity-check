@@ -307,12 +307,6 @@ int client_sliding_window_2(const int sockfd, int message[], struct sockaddr_in 
             message[0] = next_seq;
             // Send to server blocked
             int send_to = sendto(sockfd, message, MAX_MESSAGE_SIZE * sizeof(int), 0, (struct sockaddr *)&serv_addr, serv_addr_len);
-            // if (send_to == -1) {
-            //     perror("sendto");
-            //     return -1;
-            // }
-            // std::cout << "incrementing sequence: " << next_seq << std::endl;
-            // std::cout << "base: " << base << ", next_sequence: " << next_seq << std::endl;
             next_seq++;
         }
 
@@ -337,7 +331,7 @@ int client_sliding_window_2(const int sockfd, int message[], struct sockaddr_in 
                 elapsed_time_usec = 0;
                 timer_start = false;
             } else {
-                std::cout << "Start timer!" << std::endl << std::boolalpha;
+                // std::cout << "Start timer!" << std::endl << std::boolalpha;
                 if (!timer_start) {
                     gettimeofday(&start_time, NULL);
                     elapsed_time_usec = 0;
@@ -348,7 +342,7 @@ int client_sliding_window_2(const int sockfd, int message[], struct sockaddr_in 
                     starting_point = true;
                 }
 
-                std::cout << "timer_start && !starting_point: " << (timer_start && !starting_point) << std::endl;
+                // std::cout << "timer_start && !starting_point: " << (timer_start && !starting_point) << std::endl;
                 
                 // start timer 
                 // gettimeofday(&start_time, NULL);
@@ -356,18 +350,18 @@ int client_sliding_window_2(const int sockfd, int message[], struct sockaddr_in 
             }
         }
        
-        std::cout << "timer_start & !starting_point: " << (timer_start && !starting_point) << std::endl;
+        // std::cout << "timer_start & !starting_point: " << (timer_start && !starting_point) << std::endl;
         if (timer_start && !starting_point) {
-            std::cout << "going to lap time" << std::endl;
+            // std::cout << "going to lap time" << std::endl;
             gettimeofday(&stop_time, NULL);
             elapsed_time_usec = (((stop_time.tv_sec - start_time.tv_sec) * 1000000) + (stop_time.tv_usec - start_time.tv_usec));        
         } else {
-            std::cout << "heeeeereee" << std::endl;
+            // std::cout << "heeeeereee" << std::endl;
             starting_point = false;
             timeout = false;
             // std::cout << "elapsed time: " << elapsed_time_usec << std::endl;
         }
-        std::cout << "elapsed time: " << elapsed_time_usec << std::endl;
+        // std::cout << "elapsed time: " << elapsed_time_usec << std::endl;
 
         // // Reset stop times
         // stop_time.tv_sec = 0;
@@ -376,7 +370,7 @@ int client_sliding_window_2(const int sockfd, int message[], struct sockaddr_in 
         if (elapsed_time_usec > TIMEOUT) {
             timeout = true;
             timer_start = true;
-            std::cout << "TIMEOUT at: " << elapsed_time_usec << std::endl;
+            // std::cout << "TIMEOUT at: " << elapsed_time_usec << std::endl;
             gettimeofday(&start_time, NULL);
             // stop_time.tv_usec = 0;
             // stop_time.tv_sec = 0;
@@ -458,6 +452,20 @@ int main() {
         std::cout << "retransmit: " << sliding_window_retransmits << std::endl;
         std::cout << "elapsed time ms: " << elapsed_time_msec << std::endl << std::endl;
     }
+    // int i = 1;
+    // std::cout << "current: " << i << std::endl;
+    // gettimeofday(&start_time, NULL);
+
+    // int sliding_window_retransmits = client_sliding_window_2(sockfd, message, serv_addr, from_addr, i);
+    // retransmits_vector.push_back(sliding_window_retransmits);
+
+    // gettimeofday(&stop_time, NULL);
+
+    // unsigned long long elapsed_time_msec = (((stop_time.tv_sec - start_time.tv_sec) * 1000000) + (stop_time.tv_usec - start_time.tv_usec)) / 1000;
+
+    // elapsed_time_msec_vector.push_back(elapsed_time_msec);
+    // std::cout << "retransmit: " << sliding_window_retransmits << std::endl;
+    // std::cout << "elapsed time ms: " << elapsed_time_msec << std::endl << std::endl;
 
     std::cout << "RETRANSMITS: " << std::endl;
     for (int i = 0; i < retransmits_vector.size(); i++) {

@@ -159,7 +159,7 @@ void server_early_retrans(const int sockfd, struct sockaddr_in from_addr, int dr
         drop_packet = false;
         memset(buf, 0, sizeof(buf));
         memset(send_ack, 0, sizeof(send_ack));
-        if (next_seq >= MAX_RECV) {
+        if (next_seq > MAX_RECV-1) {
             std::cout << "All messages received!" << std::endl << std::endl;
             break;
         }
@@ -204,6 +204,7 @@ int main() {
         std::cout << "current: " << i << std::endl;
         server_early_retrans(sockfd, from_addr, 5);
     }
+    // server_early_retrans(sockfd, from_addr, 10);
 
       
     return 0;
