@@ -16,6 +16,10 @@
 const int MAX_DATA_SIZE = 1460 / sizeof(int);
 const int MAX_RECV = 20000;
   
+/**
+ * Unreliable Test
+ * Implements natural behavior of UDP packet transmissions
+ */
 void server_unreliable(const int sockfd, struct sockaddr_in servaddr, struct sockaddr_in fromaddr) {
     int buf[MAX_DATA_SIZE];
     unsigned int fromaddr_len = sizeof(fromaddr);
@@ -28,31 +32,6 @@ void server_unreliable(const int sockfd, struct sockaddr_in servaddr, struct soc
         }
         std::cout << buf[0] << std::endl;
         memset(buf, 0, MAX_DATA_SIZE * sizeof(int));
-    }
-}
-
-void server_sanity_check(const int sockfd, struct sockaddr_in from_addr) {
-    // recvfrom: fromaddr
-    // sendto: fromaddr
-    int buf[MAX_DATA_SIZE];
-    int send_ack[sizeof(int)];
-    unsigned int from_addr_len = sizeof(from_addr);
-
-    // recvfrom
-    int numbytes = recvfrom(sockfd, buf, MAX_DATA_SIZE * sizeof(int), 0, (struct sockaddr *)&from_addr, &from_addr_len);    
-    if (numbytes == -1) {
-        perror("recvfrom");
-        return;
-    }
-
-    std::cout << "Received from client: " << buf[0] << std::endl;
-    std::cout << "send ack to client..." << std::endl;
-    send_ack[0] = buf[0] + 1;
-    // sendto
-    int send_to = sendto(sockfd, send_ack, sizeof(int), 0, (const struct sockaddr *) &from_addr, from_addr_len);
-    if (send_to == -1) {
-        perror("sendto");
-        return;
     }
 }
 
@@ -167,6 +146,22 @@ void server_early_retrans(const int sockfd, struct sockaddr_in from_addr, int dr
 
 }
 
+/**
+ * Helper function to get user input
+ */
+int test_user_input() {
+    int test_case;
+    std::cout << "Choose a testcase" << 
+        "\n\t1: unreliable test" <<
+        "\n\t2: stop-and-wait test" << 
+        "\n\t3: sliding window" <<
+        "\n\t4: sliding window with errors" <<
+        "\n--> ";
+    std::cin >> test_case;
+
+    return test_case;
+}
+
 // Driver code
 int main() {
     int sockfd;
@@ -195,15 +190,35 @@ int main() {
         exit(EXIT_FAILURE);
     }
       
-    // server_unreliable(sockfd, servaddr, fromaddr);
-    // server_sanity_check(sockfd, from_addr);
-    // server_stop_wait(sockfd, from_addr);
-    // server_early_retrans(sockfd, from_addr, 5);
 
-    // for (int i = 1; i <= 7; i++) {
-    //     std::cout << "current: " << i << std::endl;
-    //     server_early_retrans(sockfd, from_addr, 0);
-    // }
+    // Get user input
+    int test_case = test_user_input();
+    int probability_drop;
+
+    switch (test_case)
+    {
+    case 1:
+        std::cout << "Unreliable test chosen!" << std::endl;
+        server_unreliable(sockfd, serv_addr, from_addr);
+        break;
+    case 2:
+        std::cout << "Stop-and-Wait test chosen!" << std::endl;
+        server_stop_wait(sockfd, from_addr);
+        break;
+    case 3:
+        std::cout << "Sliding Window (Go-Back-N) test chosen!" << std::endl;
+        server_early_retrans(sockfd, from_addr);
+        break;
+    case 4:
+        std::cout << "Sliding Window (Go-Back-N) with errors test chosen!" << std::endl;
+        std::cout << "Enter probability drop: ";
+        std::cin >> probability_drop;
+        std::cout << probability_drop;
+        server_early_retrans(sockfd, from_addr, probability_drop);
+    default:
+        break;
+    }
+
     server_early_retrans(sockfd, from_addr, 10);
 
       
