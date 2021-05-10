@@ -413,10 +413,10 @@ int main() {
     memset(&serv_addr, 0, sizeof(serv_addr));
     memset(&from_addr, 0, sizeof(from_addr));
     struct hostent        *he;      
-    he = gethostbyname("127.0.0.1");
+    // he = gethostbyname("127.0.0.1");
 
     // Linux lab: 2
-    // he = gethostbyname("10.155.176.23");
+    he = gethostbyname("10.155.176.23");
 
     // Filling server information
     serv_addr.sin_family = AF_INET;
@@ -437,35 +437,42 @@ int main() {
     // Start timer;
     struct timeval start_time;
     struct timeval stop_time;
-    for (int i = 1; i <= 30; i++) {
-        std::cout << "current: " << i << std::endl;
-        gettimeofday(&start_time, NULL);
+    // for (int i = 0; i <= 30; i += 5) {
+    //     std::cout << "current: " << i << std::endl;
+    //     gettimeofday(&start_time, NULL);
 
-        int sliding_window_retransmits = client_sliding_window_2(sockfd, message, serv_addr, from_addr, i);
-        retransmits_vector.push_back(sliding_window_retransmits);
+    //     if (i == 0) {
+    //         int sliding_window_retransmits = client_sliding_window_2(sockfd, message, serv_addr, from_addr, i+1);
+    //         retransmits_vector.push_back(sliding_window_retransmits);
+    //     } else {
+    //         int sliding_window_retransmits = client_sliding_window_2(sockfd, message, serv_addr, from_addr, i+1);
+    //         retransmits_vector.push_back(sliding_window_retransmits);
+    //     }
+        
+        
 
-        gettimeofday(&stop_time, NULL);
+    //     gettimeofday(&stop_time, NULL);
 
-        unsigned long long elapsed_time_msec = (((stop_time.tv_sec - start_time.tv_sec) * 1000000) + (stop_time.tv_usec - start_time.tv_usec)) / 1000;
+    //     unsigned long long elapsed_time_msec = (((stop_time.tv_sec - start_time.tv_sec) * 1000000) + (stop_time.tv_usec - start_time.tv_usec)) / 1000;
 
-        elapsed_time_msec_vector.push_back(elapsed_time_msec);
-        std::cout << "retransmit: " << sliding_window_retransmits << std::endl;
-        std::cout << "elapsed time ms: " << elapsed_time_msec << std::endl << std::endl;
-    }
-    // int i = 1;
-    // std::cout << "current: " << i << std::endl;
-    // gettimeofday(&start_time, NULL);
+    //     elapsed_time_msec_vector.push_back(elapsed_time_msec);
+    //     std::cout << "retransmit: " << sliding_window_retransmits << std::endl;
+    //     std::cout << "elapsed time ms: " << elapsed_time_msec << std::endl << std::endl;
+    // }
+    int i = 1;
+    std::cout << "current: " << i << std::endl;
+    gettimeofday(&start_time, NULL);
 
-    // int sliding_window_retransmits = client_sliding_window_2(sockfd, message, serv_addr, from_addr, i);
-    // retransmits_vector.push_back(sliding_window_retransmits);
+    int sliding_window_retransmits = client_sliding_window_2(sockfd, message, serv_addr, from_addr, i);
+    retransmits_vector.push_back(sliding_window_retransmits);
 
-    // gettimeofday(&stop_time, NULL);
+    gettimeofday(&stop_time, NULL);
 
-    // unsigned long long elapsed_time_msec = (((stop_time.tv_sec - start_time.tv_sec) * 1000000) + (stop_time.tv_usec - start_time.tv_usec)) / 1000;
+    unsigned long long elapsed_time_msec = (((stop_time.tv_sec - start_time.tv_sec) * 1000000) + (stop_time.tv_usec - start_time.tv_usec)) / 1000;
 
-    // elapsed_time_msec_vector.push_back(elapsed_time_msec);
-    // std::cout << "retransmit: " << sliding_window_retransmits << std::endl;
-    // std::cout << "elapsed time ms: " << elapsed_time_msec << std::endl << std::endl;
+    elapsed_time_msec_vector.push_back(elapsed_time_msec);
+    std::cout << "retransmit: " << sliding_window_retransmits << std::endl;
+    std::cout << "elapsed time ms: " << elapsed_time_msec << std::endl << std::endl;
 
     std::cout << "RETRANSMITS: " << std::endl;
     for (int i = 0; i < retransmits_vector.size(); i++) {

@@ -1,6 +1,0 @@
-current: 1
-Sliding Window with size: 1
-All messages sent!
-
-current: 2
-Sliding Window with size: 2

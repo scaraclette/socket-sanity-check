@@ -1,70 +1,71 @@
 current: 1
 Sliding Window with size: 1
 All messages sent!
-retransmit: 219
-elapsed time ms: 2907
+retransmit: 198
+elapsed time ms: 2958
 
 RETRANSMITS: 
-219,
+198,
 ELAPSED TIME: 
-2907,
+2958,
+
 current: 5
 Sliding Window with size: 5
 All messages sent!
-retransmit: 2625
-elapsed time ms: 807
+retransmit: 3295
+elapsed time ms: 999
 
 RETRANSMITS: 
-2625,
+3295,
 ELAPSED TIME: 
-807,
+999,
 current: 10
 Sliding Window with size: 10
 All messages sent!
-retransmit: 4921
-elapsed time ms: 749
+retransmit: 6102
+elapsed time ms: 922
 
 RETRANSMITS: 
-4921,
+6102,
 ELAPSED TIME: 
-749,
+922,
 current: 15
 Sliding Window with size: 15
 All messages sent!
-retransmit: 8352
-elapsed time ms: 841
+retransmit: 9594
+elapsed time ms: 966
 
 RETRANSMITS: 
-8352,
+9594,
 ELAPSED TIME: 
-841,
+966,
 current: 20
 Sliding Window with size: 20
 All messages sent!
-retransmit: 11460
-elapsed time ms: 874
+retransmit: 16322
+elapsed time ms: 1230
 
 RETRANSMITS: 
-11460,
+16322,
 ELAPSED TIME: 
-874,
+1230,
 current: 25
 Sliding Window with size: 25
 All messages sent!
-retransmit: 16134
-elapsed time ms: 974
+retransmit: 21292
+elapsed time ms: 1281
 
 RETRANSMITS: 
-16134,
+21292,
 ELAPSED TIME: 
-974,
+1281,
 current: 30
 Sliding Window with size: 30
 All messages sent!
-retransmit: 21046
-elapsed time ms: 1056
+retransmit: 27178
+elapsed time ms: 1362
 
 RETRANSMITS: 
-21046,
+27178,
 ELAPSED TIME: 
-1056,
+1362,
