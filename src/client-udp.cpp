@@ -459,7 +459,7 @@ int main() {
     //     std::cout << "retransmit: " << sliding_window_retransmits << std::endl;
     //     std::cout << "elapsed time ms: " << elapsed_time_msec << std::endl << std::endl;
     // }
-    int i = 1;
+    int i = 30;
     std::cout << "current: " << i << std::endl;
     gettimeofday(&start_time, NULL);
 

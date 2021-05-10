@@ -1,0 +1,71 @@
+current: 1
+Sliding Window with size: 1
+All messages sent!
+retransmit: 2328
+elapsed time ms: 6441
+
+RETRANSMITS: 
+2328,
+ELAPSED TIME: 
+6441,
+current: 5
+Sliding Window with size: 5
+All messages sent!
+retransmit: 11565
+elapsed time ms: 3485
+
+RETRANSMITS: 
+11565,
+ELAPSED TIME: 
+3485,
+current: 10
+Sliding Window with size: 10
+All messages sent!
+retransmit: 22675
+elapsed time ms: 3405
+
+RETRANSMITS: 
+22675,
+ELAPSED TIME: 
+3405,
+
+current: 15
+Sliding Window with size: 15
+All messages sent!
+retransmit: 33697
+elapsed time ms: 3378
+
+RETRANSMITS: 
+33697,
+ELAPSED TIME: 
+3378,
+current: 20
+Sliding Window with size: 20
+All messages sent!
+retransmit: 45168
+elapsed time ms: 3392
+
+RETRANSMITS: 
+45168,
+ELAPSED TIME: 
+3392,
+current: 25
+Sliding Window with size: 25
+All messages sent!
+retransmit: 55566
+elapsed time ms: 3338
+
+RETRANSMITS: 
+55566,
+ELAPSED TIME: 
+3338,
+current: 30
+Sliding Window with size: 30
+All messages sent!
+retransmit: 66568
+elapsed time ms: 3339
+
+RETRANSMITS: 
+66568,
+ELAPSED TIME: 
+3339,

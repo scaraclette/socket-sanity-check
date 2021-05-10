@@ -204,7 +204,7 @@ int main() {
     //     std::cout << "current: " << i << std::endl;
     //     server_early_retrans(sockfd, from_addr, 0);
     // }
-    server_early_retrans(sockfd, from_addr, 2);
+    server_early_retrans(sockfd, from_addr, 10);
 
       
     return 0;
