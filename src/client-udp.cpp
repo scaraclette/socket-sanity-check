@@ -15,6 +15,7 @@
 #include <iostream>
 #include <sys/time.h>
 #include <vector>
+#include <chrono>
 
   
 #define PORT 6373
@@ -296,7 +297,10 @@ int client_sliding_window_2(const int sockfd, int message[], struct sockaddr_in 
     struct timeval start_time;
     struct timeval stop_time;
     unsigned long long elapsed_time_usec = 0;
+    // long long elapsed_time_usec = 0;
     bool timer_start = false;
+    bool starting_point = false;
+    bool timeout = true;
 
     while (true) {
         if (next_seq < base + window_size) {
@@ -333,35 +337,49 @@ int client_sliding_window_2(const int sockfd, int message[], struct sockaddr_in 
                 elapsed_time_usec = 0;
                 timer_start = false;
             } else {
-                // std::cout << "Start timer!" << std::endl;
+                std::cout << "Start timer!" << std::endl << std::boolalpha;
+                if (!timer_start) {
+                    gettimeofday(&start_time, NULL);
+                    elapsed_time_usec = 0;
+                }
+
                 timer_start = true;
+                if (timeout) {
+                    starting_point = true;
+                }
+
+                std::cout << "timer_start && !starting_point: " << (timer_start && !starting_point) << std::endl;
+                
                 // start timer 
-                gettimeofday(&start_time, NULL);
+                // gettimeofday(&start_time, NULL);
                 // elapsed_time_usec = 0;
             }
         }
-        // std::cout << "did not receive" << std::endl;
-        // Check if window times out
-        // if (timer_start) {
-        //     std::cout << "going to gettime of day" << std::endl;
-        //     gettimeofday(&stop_time, NULL);
-        //     elapsed_time_usec = (((stop_time.tv_sec - start_time.tv_sec) * 1000000) + (stop_time.tv_usec - start_time.tv_usec));    
-        // }
-        gettimeofday(&stop_time, NULL);
-        elapsed_time_usec += (((stop_time.tv_sec - start_time.tv_sec) * 1000000) + (stop_time.tv_usec - start_time.tv_usec));
-
-        // std::cout << "elapsed time: " << elapsed_time_usec << std::endl;
+       
+        std::cout << "timer_start & !starting_point: " << (timer_start && !starting_point) << std::endl;
+        if (timer_start && !starting_point) {
+            std::cout << "going to lap time" << std::endl;
+            gettimeofday(&stop_time, NULL);
+            elapsed_time_usec = (((stop_time.tv_sec - start_time.tv_sec) * 1000000) + (stop_time.tv_usec - start_time.tv_usec));        
+        } else {
+            std::cout << "heeeeereee" << std::endl;
+            starting_point = false;
+            timeout = false;
+            // std::cout << "elapsed time: " << elapsed_time_usec << std::endl;
+        }
+        std::cout << "elapsed time: " << elapsed_time_usec << std::endl;
 
         // // Reset stop times
         // stop_time.tv_sec = 0;
         // stop_time.tv_usec = 0;
 
         if (elapsed_time_usec > TIMEOUT) {
+            timeout = true;
             timer_start = true;
-            // std::cout << "TIMEOUT at: " << elapsed_time_usec << std::endl;
+            std::cout << "TIMEOUT at: " << elapsed_time_usec << std::endl;
             gettimeofday(&start_time, NULL);
-            stop_time.tv_usec = 0;
-            stop_time.tv_sec = 0;
+            // stop_time.tv_usec = 0;
+            // stop_time.tv_sec = 0;
             elapsed_time_usec = 0;
             // std::cout << "base: " << base << ", next_sequence: " << next_seq << std::endl;
             for (int i = base; i < next_seq; i++) {
@@ -381,9 +399,9 @@ int client_sliding_window_2(const int sockfd, int message[], struct sockaddr_in 
             std::cout << "All messages sent!" << std::endl;
             break;
         }
-
-        retransmit_count;
     }
+
+    return retransmit_count;
 }
 
 // Driver code
@@ -401,10 +419,10 @@ int main() {
     memset(&serv_addr, 0, sizeof(serv_addr));
     memset(&from_addr, 0, sizeof(from_addr));
     struct hostent        *he;      
-    // he = gethostbyname("127.0.0.1");
+    he = gethostbyname("127.0.0.1");
 
     // Linux lab: 2
-    he = gethostbyname("10.155.176.23");
+    // he = gethostbyname("10.155.176.23");
 
     // Filling server information
     serv_addr.sin_family = AF_INET;
